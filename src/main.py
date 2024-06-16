@@ -84,13 +84,7 @@ def main_modelado_circulacion(): # Modelado de la red como circulación
 	plt.show()  # Dibujo grafo
 
 
-def main_modelado_cost_min(): # Modelado de la red como costo mínimo
-	filename = "instances/toy_instance.json"
-	filename = "instances/retiro-tigre-semana.json"
-	#filename = "instances/ejercicio4_.json" #Coordinación
-	#filename = "instances/ejercicio4_3.json" #Importancia puntualidad con ej4_2
-	#filename = "instances/ejercicio4_4.json" #Comparativa modelo con manual
-	#filename = "instances/ejercicio4_5.json" #No funcional
+def main_modelado_cost_min(filename): # Modelado de la red como costo mínimo
 
 	with open(filename) as json_file: # Cargo data
 		data = json.load(json_file)
@@ -155,22 +149,14 @@ def main_modelado_cost_min(): # Modelado de la red como costo mínimo
 	edge_colors = [G[u][v]['color'] for u, v in G.edges()] # Obtengo lista de colores de arístas
 	nx.draw(G, with_labels=True, font_weight='bold', pos=pos, edge_color=edge_colors, connectionstyle='arc3, rad = 0.2') # Dibujo grafo
 	flowCost, flow_dict = nx.capacity_scaling(G, demand='demand', weight='weight') # Obtengo costo y flujos
-	print(flowCost)
-	print(retiro[-1])
-	print(tigre[-1])
-	print(flow_dict[retiro[-1]],flow_dict[tigre[-1]])
+	print('Cantidad total de trenes: ',flowCost)
+	print('Flujo de Retiro: ',flow_dict[retiro[-1]],' / Flujo de Tigre: ' ,flow_dict[tigre[-1]])
+	print('\n')
 	#plt.show() # Grafico
 
 
 
-def main_modelado_cost_min_restricciones(sede, restriccion): # Modelado de la red como costo mínimo
-	filename = "instances/toy_instance.json"
-	filename = "instances/retiro-tigre-semana.json"
-	#filename = "instances/ejercicio4_.json" #Coordinación
-	#filename = "instances/ejercicio4_3.json" #Importancia puntualidad con ej4_2
-	#filename = "instances/ejercicio4_4.json" #Comparativa modelo con manual
-	#filename = "instances/ejercicio4_5.json" #No funcional
-	#filename = "instances/ejercicio4_restriccion.json"
+def main_modelado_cost_min_restricciones(filename, sede, restriccion): # Modelado de la red como costo mínimo
 
 	with open(filename) as json_file: # Cargo data
 		data = json.load(json_file)
@@ -231,24 +217,81 @@ def main_modelado_cost_min_restricciones(sede, restriccion): # Modelado de la re
 	if(sede=='Retiro'):
 		G.add_edge(retiro[-1],retiro[0], weight = 1, capacity = restriccion, color='red') # Agrego individualmente arísta n->1 c/ peso 1 (modificable con JSON) y capacidad restringida
 		G.add_edge(tigre[-1],tigre[0], weight = 1, capacity = 1e10, color='red') # Agrego individualmente arísta n->1 c/ peso 1 (modificable con JSON) y capacidad infinita
-		G.add_edge(retiro[-1],tigre[0], weight = 1, capacity = 1e10, color='red')
+	#G.add_edge(retiro[-1],tigre[0], weight = 1, capacity = 1e10, color='red') # Descomentar si se quiere probar, es arista de solución propuesta en informe
 	else:
 		G.add_edge(retiro[-1],retiro[0], weight = 1, capacity = 1e10, color='red') # Agrego individualmente arísta n->1 c/ peso 1 (modificable con JSON) y capacidad infinita
 		G.add_edge(tigre[-1],tigre[0], weight = 1, capacity = restriccion, color='red') # Agrego individualmente arísta n->1 c/ peso 1 (modificable con JSON) y capacidad restringida
-		G.add_edge(tigre[-1],retiro[0], weight = 1, capacity = 1e10, color='red')
+		#G.add_edge(tigre[-1],retiro[0], weight = 1, capacity = 1e10, color='red') # Descomentar si se quiere probar, es arista de solución propuesta en informe
 	#------------------------------------------
 
 	edge_colors = [G[u][v]['color'] for u, v in G.edges()] # Obtengo lista de colores de arístas
 	nx.draw(G, with_labels=True, font_weight='bold', pos=pos, edge_color=edge_colors, connectionstyle='arc3, rad = 0.2') # Dibujo grafo
 	flowCost, flow_dict = nx.capacity_scaling(G, demand='demand', weight='weight') # Obtengo costo y flujos
-	print(flowCost)
-	print(flow_dict[retiro[-1]],flow_dict[tigre[-1]])
-	#plt.show() # Grafico
-	print(retiro)
-	print(tigre)
-
+	print('Cantidad total de trenes: ',flowCost)
+	print('Flujo de Retiro: ',flow_dict[retiro[-1]],' / Flujo de Tigre: ',flow_dict[tigre[-1]])
+	print('\n')
 
 if __name__ == "__main__":
-	#main_modelado_cost_min()
-	#main_modelado_circulacion()
-	main_modelado_cost_min_restricciones('Retiro',100)
+
+
+	#---- Dataset Toy --------------
+	print('Dataset Toy')
+	main_modelado_cost_min("instances/toy_instance.json")
+	#-------------------------------
+	#---- Dataset Real -------
+	print('Dataset Real')
+	main_modelado_cost_min("instances/retiro-tigre-semana.json")
+	#-------------------------------
+
+	#---- Experimento 1 ----
+	print('Experimento 1:')
+	main_modelado_cost_min("instances/ejercicio4_exp.json") #Coordinación - Ejemplo 1
+	#-----------------------
+
+	#---- Experimento 2 ----
+	print('Experimento 2:')
+	main_modelado_cost_min("instances/ejercicio4_2.json") # Puntualidad - Ejemplo 2
+	main_modelado_cost_min("instances/ejercicio4_3.json") # Importancia puntualidad con ej4_2 - Ejemplo 2
+	#-----------------------
+
+	#---- Experimento 3 ----
+	print('Experimento 3: (Rompe)')
+	#main_modelado_cost_min("instances/ejercicio4_5.json") # Viajes de ida - Ejemplo 3
+	#-----------------------
+
+	#---- Experimento 4 ----
+	print('Experimento 4:')
+	main_modelado_cost_min("instances/retiro-tigre-semana_exp1.json") # Caida en la demanda en Retiro
+	#-----------------------
+
+	#---- Experimento 5 ----
+	print('Experimento 5:')
+	main_modelado_cost_min("instances/retiro-tigre-semana_exp2.json") # Aumento en la demanda en Retiro
+	#-----------------------
+
+	#---- Experimento 6 ----
+	print('Experimento 6:')
+	main_modelado_cost_min("instances/retiro-tigre-semana_exp3.json") # Aumento en la demanda en ambas estaciones
+	#-----------------------
+
+	#---- Experimento 7 ----
+	print('Experimento 7:')
+	main_modelado_cost_min_restricciones("instances/retiro-tigre-semana_exp4.json",'Tigre', 40) 
+	#main_modelado_cost_min_restricciones("instances/retiro-tigre-semana.json",'Tigre', 40)
+	#-----------------------
+
+	#---- Experimento 8 ----
+	print('Experimento 8:')
+	main_modelado_cost_min_restricciones("instances/retiro-tigre-semana_exp5.json",'Tigre', 24) 
+	#main_modelado_cost_min_restricciones("instances/retiro-tigre-semana.json",'Tigre', 40)
+	#-----------------------
+
+	#---- Modelo Manual Ejemplo ----
+	print('Ejemplo de Manual (INFORME):')
+	main_modelado_cost_min("instances/ejercicio4_4.json") # Comparativa modelo con manual 
+	#-------------------------------
+
+	#---- Nuevo Dataset EJ 4 -------
+	print('Dataset nuevo de Ejercicio 4')
+	main_modelado_cost_min("instances/ejercicio4_finde.json" ) # Nuevo dataset - Ejercicio 4
+	#-------------------------------
